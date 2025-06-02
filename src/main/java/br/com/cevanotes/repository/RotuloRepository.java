@@ -27,4 +27,27 @@ public class RotuloRepository {
                         .findOne());
 
     }
+
+    public int insert(Rotulo r) {
+        return jdbi.withHandle(handle ->
+                handle.createUpdate("INSERT INTO rotulos (nome, estilo, teor_alcoolico, cervejaria, data_cadastro) " +
+                        "VALUES (:nome, :estilo, :teorAlcoolico, :cervejaria, :dataCadastro)")
+                        .bindBean(r)
+                        .executeAndReturnGeneratedKeys("id")
+                        .mapTo(Integer.class)
+                        .one());
+    }
+
+    public void update(Rotulo r) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate("UPDATE rotulos SET " +
+                                "nome = :nome, " +
+                        "estilo = :estilo, " +
+                        "teor_alcoolico = :teorAlcoolico, " +
+                        "cervejaria = :cervejaria, " +
+                        "data_cadastro = :dataCadastro " +
+                        "WHERE id = :id")
+                        .bindBean(r)
+                        .execute());
+    }
 }
