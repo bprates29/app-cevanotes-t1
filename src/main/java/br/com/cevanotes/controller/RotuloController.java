@@ -11,6 +11,8 @@ import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 
 public class RotuloController {
+    public static final String ROTULOS_PATH = "/rotulos";
+    public static final String ROTULOS_BY_ID_PATH = ROTULOS_PATH + "/{id}";
     private final RotuloService service;
 
     public RotuloController (RotuloService service) {
@@ -18,12 +20,12 @@ public class RotuloController {
     }
 
     public void registrarRotas(Javalin app) {
-        app.get("/rotulos", ctx -> ctx.json(service.listar()));
-        app.get("/rotulos/{id}", ctx -> {
+        app.get(ROTULOS_PATH, ctx -> ctx.json(service.listar()));
+        app.get(ROTULOS_BY_ID_PATH, ctx -> {
             var id = parseIdParam(ctx);
             ctx.json(service.buscarPorId(id));
         });
-        app.post("/rotulos", ctx -> {
+        app.post(ROTULOS_PATH, ctx -> {
             RotuloDTO dto = ctx.bodyValidator(RotuloDTO.class)
                     .check(r -> r.getNome() != null && !r.getNome().isBlank(), "Nome Obrigatório!")
                     .check(r -> r.getEstilo() != null && !r.getEstilo().isBlank(), "Estilo é obrigatório!")
@@ -33,11 +35,16 @@ public class RotuloController {
             Rotulo novo = service.salvar(dto);
             ctx.status(201).json(novo);
         });
-        app.put("/rotulos/{id}", ctx -> {
+        app.put(ROTULOS_BY_ID_PATH, ctx -> {
             var id = parseIdParam(ctx);
             var r = ctx.bodyAsClass(RotuloDTO.class);
             var update = service.atualizar(id, r);
             ctx.status(200).json(update);
+        });
+        app.delete(ROTULOS_BY_ID_PATH, ctx -> {
+            int id = parseIdParam(ctx);
+            service.deletar(id);
+            ctx.status(204);
         });
     }
 
